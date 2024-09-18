@@ -195,6 +195,8 @@ Return Value:
 {
     UNREFERENCED_PARAMETER( Flags );
 
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "Unload minifilter.\n");
+
     PAGED_CODE();
 
     FltUnregisterFilter( NullFilterData.FilterHandle );
@@ -231,6 +233,8 @@ Return Value:
 {
     UNREFERENCED_PARAMETER( FltObjects );
     UNREFERENCED_PARAMETER( Flags );
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "Detach instance.\n");
 
     PAGED_CODE();
 
