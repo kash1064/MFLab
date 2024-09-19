@@ -41,6 +41,89 @@ typedef struct _NULL_FILTER_DATA {
 } NULL_FILTER_DATA, *PNULL_FILTER_DATA;
 
 
+//---------------------------------------------------------------------------
+//      Custom
+//---------------------------------------------------------------------------
+
+FLT_PREOP_CALLBACK_STATUS
+FuncPreCreate(
+    _Inout_ PFLT_CALLBACK_DATA Data,
+    _In_ PCFLT_RELATED_OBJECTS FltObjects,
+    _Flt_CompletionContext_Outptr_ PVOID* CompletionContext
+)
+{
+    UNREFERENCED_PARAMETER(FltObjects);
+    UNREFERENCED_PARAMETER(CompletionContext);
+
+    PAGED_CODE();
+
+    NTSTATUS status;
+    PFLT_FILE_NAME_INFORMATION nameInfo;
+
+    status = FltGetFileNameInformation(Data,
+        FLT_FILE_NAME_NORMALIZED |
+        FLT_FILE_NAME_QUERY_DEFAULT,
+        &nameInfo);
+
+    if (!NT_SUCCESS(status)) {
+
+        return FLT_POSTOP_FINISHED_PROCESSING;
+    }
+
+    FltParseFileNameInformation(nameInfo);
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "FuncPreCreate %wZ.\n", &nameInfo->FinalComponent);
+
+    FltReleaseFileNameInformation(nameInfo);
+
+    return FLT_PREOP_SUCCESS_WITH_CALLBACK;
+}
+
+FLT_POSTOP_CALLBACK_STATUS
+FuncPostCreate(
+    _Inout_ PFLT_CALLBACK_DATA Data,
+    _In_ PCFLT_RELATED_OBJECTS FltObjects,
+    _In_opt_ PVOID CompletionContext,
+    _In_ FLT_POST_OPERATION_FLAGS Flags
+)
+{
+    UNREFERENCED_PARAMETER(CompletionContext);
+    UNREFERENCED_PARAMETER(FltObjects);
+    UNREFERENCED_PARAMETER(Flags);
+
+    NTSTATUS status;
+    PFLT_FILE_NAME_INFORMATION nameInfo;
+
+    status = FltGetFileNameInformation(Data,
+        FLT_FILE_NAME_NORMALIZED |
+        FLT_FILE_NAME_QUERY_DEFAULT,
+        &nameInfo);
+
+    if (!NT_SUCCESS(status)) {
+
+        return FLT_POSTOP_FINISHED_PROCESSING;
+    }
+
+    FltParseFileNameInformation(nameInfo);
+
+    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "FuncPostCreate %wZ.\n", &nameInfo->FinalComponent);
+
+    FltReleaseFileNameInformation(nameInfo);
+
+    return FLT_POSTOP_FINISHED_PROCESSING;
+}
+
+const FLT_OPERATION_REGISTRATION Callbacks[] = {
+
+    { IRP_MJ_CREATE,
+      0,
+      FuncPreCreate,
+      FuncPostCreate},
+
+    { IRP_MJ_OPERATION_END }
+};
+
+
 /*************************************************************************
     Prototypes for the startup and unload routines used for
     this Filter.
@@ -95,7 +178,7 @@ CONST FLT_REGISTRATION FilterRegistration = {
     0,                                  //  Flags
 
     NULL,                               //  Context
-    NULL,                               //  Operation callbacks
+    Callbacks,                               //  Operation callbacks
 
     NullUnload,                         //  FilterUnload
 
