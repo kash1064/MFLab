@@ -94,37 +94,11 @@ typedef struct _DATA_CONTEXT {
 } DATA_CONTEXT, * PDATA_CONTEXT;
 
 
-VOID
-FuncContextCleanup(
-    _In_ PFLT_CONTEXT Context,
-    _In_ FLT_CONTEXT_TYPE ContextType
-)
-{
-    UNREFERENCED_PARAMETER(ContextType);
-
-    PDATA_CONTEXT dataContext;
-
-    PAGED_CODE();
-
-    dataContext = (PDATA_CONTEXT)Context;
-    if (dataContext->message.Buffer != NULL) {
-
-        DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "FuncContextCleanup: Cleanup context of %wZ, %p.\n", dataContext->message, &dataContext->message);
-
-        ExFreePoolWithTag(&dataContext->message.Buffer, 'galF');
-        dataContext->message.Buffer = NULL;
-        dataContext->message.MaximumLength = 0;
-
-    }
-
-}
-
-
 const FLT_CONTEXT_REGISTRATION ContextRegistration[] = {
 
     { FLT_FILE_CONTEXT,
       0,
-      FuncContextCleanup,
+      NULL,
       sizeof(DATA_CONTEXT),
       'galF' },
 
