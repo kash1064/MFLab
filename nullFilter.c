@@ -111,7 +111,7 @@ FuncContextCleanup(
 
         DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "FuncContextCleanup: Cleanup context of %wZ, %p.\n", dataContext->message, &dataContext->message);
 
-        ExFreePoolWithTag(&dataContext->message.Buffer, 'glaF');
+        ExFreePoolWithTag(&dataContext->message.Buffer, 'galF');
         dataContext->message.Buffer = NULL;
         dataContext->message.MaximumLength = 0;
 
